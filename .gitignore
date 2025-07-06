@@ -1,0 +1,9 @@
+# ignore system files
+.DS_Store
+
+# ignore notebook checkpoints
+.ipynb_checkpoints
+
+# ignore nn project directories
+Papers
+Data
