@@ -7,3 +7,5 @@
 # ignore nn project directories
 Papers
 Data
+Test
+__pycache__
