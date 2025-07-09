@@ -60,6 +60,10 @@ class ManifoldSculpting():
         while self.scale_factor > 0.01: # can be tuned
             mean_error = self.step()
             epoch += 1
+            if epoch%20:
+                print(f'''
+                INFO: Elapsed epochs: {epoch}
+                ''')
 
         epochs_since_improvement = 0
         best_error = torch.Tensor(float('inf'))
@@ -80,10 +84,11 @@ class ManifoldSculpting():
             else:
                 epochs_since_improvement += 1
                 
-            epochs += 1
-            if epochs%20:
+            epoch += 1
+            if epoch%20:
                 print(f'''
-                INFO: Elapsed epochs: {epochs}''')
+                INFO: Elapsed epochs: {epoch}
+                ''')
 
         ## DEBUG and monitoring
         self.elapsed_epochs = epoch
