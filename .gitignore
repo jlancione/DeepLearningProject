@@ -9,3 +9,12 @@ Papers
 Data
 Test
 __pycache__
+
+
+# ignore latex auxiliary files
+*.aux
+*.fdb_latexmk
+*.fls
+*.log
+*.synctex.gz
+
