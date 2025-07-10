@@ -13,8 +13,11 @@ __pycache__
 
 # ignore latex auxiliary files
 *.aux
+*.bbl
+*.blg
 *.fdb_latexmk
 *.fls
 *.log
+*.out
 *.synctex.gz
 
