@@ -2,6 +2,7 @@
 \usepackage{a4wide,gsiindex,helvet}
 \usepackage[english]{babel}
 \usepackage{amsmath,amsfonts,amssymb,verbatim,float}
+\usepackage{physics}
 \usepackage[]{graphicx} % Graphic files: pdf or jpg
 \usepackage{booktabs}
 \usepackage{subfig}
@@ -32,25 +33,26 @@ how true is it relating
 \maketitle
 
 \section{Question and insights}
-% TODO sii 1 filo - roboante
-This work revolves around the latent representiation developed with autoencoders and how far the insight of the manifold hypothesis can be pushed with this respect. In other words, is there really a connection between the latent representation build by autoencoders and the supposed data manifold?
+This work revolves around latent representiations of data and how far the insight of the manifold hypothesis can be pushed. In other words, is there really a connection between the latent representation build by autoencoders and the supposed data manifold?
 
-First, some comments on the intuition of the data manifold, because they will be the lighthouse of the following analysis. Intuition suggests that within the space of the features the actual meaningful data lies on an embedded manifold. So the data is expected to have some kind of structure. The easiest case to inspect this supposed structure is to use data that already suggests part of it and then verify if this is preserved in the representation developed by the autoencoder. For the sake of concreteness let us develop straight away the example at the basis of this work. The dataset used is MNIST, the feature space is the $28\times28$-dimensional space of all possible grey scale images. The data is hand-written digits and some structure of the data is suggested by the labels, i.e. the digits. Now the key argument: by moving on the supposed data manifold one would expect to reach all the instances of the same digit without crossing to another digit. Therefore different digits should be separated on the learned representation of such manifold, since starting from a data point labelled with digit 2 it would be awkward to be forced to go through a region of 7s to reach another instance of digit 2. This is the structure one would see preserved in a somewhat faithful representation of the data manifold.
+The intuition suggests that within the space of the features the actual meaningful data lies on an embedded manifold. So the data is expected to have some kind of structure. To inspect this supposed structure it is meaningful to use data that already suggests part of it. Then verify if this reflects in the representation developed by the autoencoder. For the sake of concreteness let us develop straight away the example at the basis of this work. The dataset used is MNIST, the features space is the $28\times28$-dimensional space of all possible grey scale images. The data is hand-written digits and some structure of the data is suggested by the labels, i.e. the digits. Now the key argument: by moving on the supposed data manifold one would expect to reach all the instances of the same digit without crossing to another digit. Therefore, different digits should be clustered on the learned representation of such manifold, since starting from a data point labelled with digit 6 it would be awkward to be forced to go through a region of 2s to reach another instance of digit 6. This is a structure one would expect to be preserved in a somewhat faithful representation of the data manifold.
+
+This leads to a precise task for the analysis: inspect clusters of digits in the latent representations learned by the models. Better representations will have better separated clusters. These spaces will then be the best candidates for the approximation of the data manifold.
 
 The proposed argument infers that representations such as fig.~\ref{fig:vae} have little to do with the supposed data manifold, since in the encoding process they loose part of the structure of the data, which could result in an inefficient latent code.
 
 \begin{figure}
   \centering
   \includegraphics[width=.6\linewidth]{image_from_vae.png}
-  \caption{2-dimensional latent representation build with a variational autoencoder \cite{Kingma2022}. The digit 6 appears at least in two different disconnected regions.}
+  \caption{2-dimensional latent representation developed with a variational autoencoder \cite{Kingma2022}. The digit 6 appears at least in two different disconnected regions.}
   \label{fig:vae}
 \end{figure}
 
 
 \section{Methods}
-To have a better understanding of the analysis I decided to fix the latent dimension for all the models to 2. There are two main reasons for this: first I wanted to keep a solid understanding of the latent space being able to visualize it without any sort of projection; second because the dimension of the data manifold is unknown, but it has to at least take into account for some degree of rotations and strectches of the digits' images. These are supposed to be the main transformations that map data points into data points. Thus, as a rough approximation, 2 is supposed to be a sufficient dimension to preserve at least the major structures in the data of the single digit. But, to tackle the question posed initially, at least 2 digits are needed to study how well the latent representations keeps them separated.
+To have a better understanding of the analysis I decided to fix the latent dimension of all the models to 2. There are two main reasons for this: first I wanted to keep a solid understanding of the latent space by being able to visualize it without any sort of projection; second because the dimension of the data manifold is unknown, but at least it has to take into account for rotations and strectches of the digits' images. These are supposed to be the main transformations that map data points into data points of the same class. Thus, as a rough approximation, 2 is supposed to be a sufficient dimension to preserve at least the major structures in the data of the single class. But, to tackle the question posed initially, at least 2 digits are needed to study how well the latent representations learned keep them separated.
 
-To sum up, I considered 2 labels at a time from dataset MNIST of hand-written digits; trained a model able to map the data to a 2 dimensional space; studied the representation. The analysis was carried on for three different models: a PCA algorithm, an autoencoder and a denoising autoencoder (fig.~\ref{fig:denoising_ae}). To compare the latent representations the metric chosen is the silhouette $s$ score \cite{Rousseeuw1987}. 
+To sum up, I considered 2 labels at a time from dataset MNIST; then trained a model able to map the data to a 2 dimensional space; at last studied the distribution of new data in the latent representation. The analysis was carried on for three different models: a PCA algorithm, an autoencoder and a denoising autoencoder (fig.~\ref{fig:denoising_ae}). To compare the latent representations the metric chosen is the silhouette $s$ score \cite{Rousseeuw1987}. 
 \begin{figure}
   \centering
   \includegraphics[width=.75\linewidth]{denoising_ae.png}
@@ -59,9 +61,13 @@ To sum up, I considered 2 labels at a time from dataset MNIST of hand-written di
 \end{figure}
 
 \subsection{Autoencoder architecture}
-The two kinds of autoencoders considered, normal and denoising share both the architecture and the training procedure\footnote{The code to reproduce all the results is hosted in the repository \url{https://github.com/jlancione/DeepLearningProject}}. The starting point is the choice to fix the latent space dimension to 2. This forces the network to compress the input to a very short code. Thus, there is no need to ask for sparsity on the latent space, since trying to impose constraints on the only two neurons would worsen the performance, pointing towards MSE as loss function. This choice to avoid regularization goes on to the encoder and decoder, summarized in table~\ref{tab:architecture}, whose weights are not tied. Again, this is because the latent space dimensionality is already a strong enough constraint imposed to the net to learn an efficient representation. Moreover, I observed that adding other hidden layers for a more gradual compression does not performs as good as the architecture proposed in table~\ref{tab:architecture}.
+The two kinds of autoencoders considered, normal and denoising share both the architecture and the training procedure\footnote{The code to reproduce all the results is hosted in the repository \url{https://github.com/jlancione/DeepLearningProject}}. Since the network is forced to compress the input to a very short code, there is no need to ask for sparsity on the latent neurons. Trying to impose constraints on the only these two neurons worsens the performance, so the loss function is the MSE
+\[
+J(x,x_\textup{rec}) = \frac{1}{2m}\norm{x - x_\textup{rec}}^2_F,
+\]
+with the frobenius norm since the images are matrices. This choice to avoid regularization goes on to the encoder and decoder, summarized in table~\ref{tab:architecture}, whose weights are not tied. Again, the latent space dimensionality is already a strong constraint imposed to the net that is asked to learn an efficient representation. Moreover, I observed that adding other hidden layers for a more gradual compression does not performs as good as the architecture proposed in table~\ref{tab:architecture}.
 
-All this reasoning relies on the validation loss as model evaluation metric. 
+Model evaluation was carried on using the validation loss as metrics. All the preceding reasoning is based on this choice.
 
 \begin{table}
   \centering
@@ -73,19 +79,19 @@ All this reasoning relies on the validation loss as model evaluation metric.
     \textbf{Decoder} & $2 \mapsto 32 \mapsto 128 \mapsto 28\times28$ \\
     \bottomrule
   \end{tabular}
-  \caption{Autoencoder architecture summary (the denoising case uses the same one). Encoder and decoder weights are not tied. Training specifics: Adam as optimizer with learning rate $lr=10^{-2}$, weight decay $=10^{-6}$. For the denoising version the gaussian noise factor is 0.3}
+  \caption{Autoencoder architecture summary (the denoising case uses the same). Encoder and decoder weights are not tied. Training specifics: Adam as optimizer with learning rate $lr=10^{-2}$, weight decay $=10^{-6}$. For the denoising version the gaussian noise factor is 0.3}
   \label{tab:architecture}
 \end{table}
 
 
 \subsection{Activation function}
-Between the fully connected layers the preferred activation function is $\tanh$. With the same architecture, it performs slightly better than ReLU, referring to the validation loss, but it is able to provide higher quality representations with a better separation of the labelled data. The reason lies in the hard cut off of the ReLU that causes most of the data to gather around the origin making the clustering harder. This proved to be especially true in the case of hard to distinguish couples of digits, for example 1 and 7, where the network with ReLU recostructs always a cloudy average digit, while the one with $\tanh$ manages not only to reconstruct them but also to cluster them.
+Between the fully connected layers the preferred activation function is $\tanh$. With the same architecture, it performs slightly better than ReLU, referring to the validation loss, but it is able to provide higher quality representations with a better separation of the labelled data. The reason lies in the hard cut off of the ReLU that causes most of the data to gather around the origin making the clustering task harder. This proved to be especially true in the case of hard to distinguish couples of digits, for example 1 and 7, where the network with ReLU recostructs just a cloudy average digit, while the one with $\tanh$ manages not only to reconstruct them but also to cluster them.
 
 \subsection{PCA}
-The algorithm is implemented as a linear autoencoder, since it is known that PCA is the best linear autoencoder provided to impose teid weights. Therefore, the code is the same of the autoencoder implementation, removing activation functions and hidden layers keeping the 2 dimensional latent space. This leads to the same latent space representation as the classical implementation of PCA, but written in a different basis, not the principal component one found diagonalizing the covariance matrix. The principal components can still be worked out \cite{Plaut2018} but it is not the focus here, what is relevant is the latent space which is the same.
+The algorithm is implemented as a linear autoencoder, since it is known that PCA is the best linear autoencoder, provided to impose teid weights. Therefore, the code is the same of the autoencoder implementation, removing activation functions and hidden layers while keeping the 2 dimensional latent space. This leads to the same latent space representation as the classical implementation of PCA, but written in a different vector basis, not the standard principal component basis found diagonalizing the covariance matrix. The principal components can still be worked out \cite{Plaut2018} but it is not the focus here, what is relevant is the latent space which is the same.
 
-Training and validation losses saturate after few epochs always to the same value fixed the couple of digits, showing that there is an optimal solution to the problem, even if there are different sets of weights, corresponding to different basis of the same space.
-The reconstruction of the images is not as accurate as the autoencoder, they are more blurred and inaccurate even if the validation loss is comparable.
+So even if it is an algorithm the weights were discovered through the same training procedure. However, the loss saturates after few epochs always to the same value fixed by the couple of digits chosen, showing that there is an optimal solution to the problem, even if there are different sets of weights, corresponding to different basis of the same space.
+The reconstruction of the images has lower quality than the autoencoder, they are more blurred and have higher inaccuracy even if the validation loss is comparable.
 
 \subsection{Silhouette score}
 The silhouette $s$ score \cite{Rousseeuw1987} provides a way to quantitatively argue about the goodness of the clusterization of some data. For each data point $i$ compute the mean distance $a(i)$ to the other points in the same cluster and the mean distance $b$ to points in the neighbor cluster, then the score is defined as
@@ -96,61 +102,70 @@ s_i =
   \frac{b_i}{a_i} - 1 \text{ if } a_i \ge b_i \\
 \end{cases}.
 \]
-Thus $s\in{-1,1}$, with $s\approx1$ if the point can be classified without doubt and $s=0$ if it is on the boundary between the clusters. To compare clustering procedures on the same dataset one relies on the average $s_\textup{avg}$ or graphically as in fig.~\ref{fig:s_score}.
+Thus $s\in[-1,1]$, with $s\approx1$ if the point can be classified without doubt and $s=0$ if it is on a boundary between clusters. To compare clustering procedures on the same dataset one relies on the average $s_\textup{avg}$ or graphically as in fig.~\ref{fig:s_score}, as will be discussed in the next section.
 
-Here it will be used in a somewhat different way, since the number of clusters and the partioning of the data is known. The issue lies in the way it is represented. Therefore, this score will be a measure of the quality of the transformation carried on by the encoder.
+Here it will be used in a somewhat different way, since the number of clusters and the partioning of the data is known. The issue lies in the way it is represented. Therefore, this score will be a measure of the quality of the transformation carried out by the encoder.
 
-Unfortunately, this score must not be interpreted as some kind of invariant across the optimal encoding which would identify the data manifold. The average silhouette score on the original $28\times28$ data is $s_\textup{orig} = 0.11$ which stands for a very weak clustering, while we expect the points to be clustered on the data manifold. This is readily interpreted through the lens of the curse of dimensionality, which suggests that each data point is isolated from all the others. Therefore one should not expect to recognize a clustering structure in the original representation. In the language of the $s$ score this means $s\approx0$, i.e. all the data is as far from its own cluster as it is from the neighboring one. In other words, in the original representation every data point is located near the boundary between clusters.
+Unfortunately, this score must not be interpreted as some kind of invariant across the optimal encoding which would identify the data manifold. The average silhouette score on the original $28\times28$ data is $s_\textup{orig} = 0.11$ which stands for a very weak clustering, while we expect the points to be well organized on the data manifold. This is readily interpreted through the lens of the curse of dimensionality, which suggests that each data point is isolated from all the others. Therefore, one should not expect to recognize a clustering structure in the original representation. In the language of the $s$ score this means $s\approx0$, i.e. all the data is as far from its own cluster as it is from the neighboring one. In other words, in the original representation every data point is located near the boundary between clusters.
 
 
 \section{Results}
-The results are in the form of plots in fig.~\ref{fig:s_score}-\ref{fig:scatter}. The silhouette plots in fig.~\ref{fig:s_score} are horizontal bar diagrams with the $s$ score for every data point ordered vertically from the highest. They are a graphical way to have an intuition of the cluster. If the silhouette, meaning the shaded region, is wide $s\approx1$ those points are in the bulk of the cluster, while if it gets narrow $s\approx0$ they are near the boundary. When it flips to the left it means that they are more easily identified as points belonging to the other cluster.
+The silhouette plots in fig.~\ref{fig:s_score} are horizontal bar diagrams with the $s$ score for every data point ordered vertically from the highest. They are a graphical way to have an intuition of the cluster. If the silhouette, meaning the shaded region, is wide $s\approx1$ and those points are in the bulk of the cluster, while if it gets narrow $s\approx0$ and they are near the boundary. When it flips to the left it means that they are more easily identified as points belonging to the neighbor cluster.
 
-The plots of the form in fig.~\ref{fig:scatter} are used to visualize the clusters in the latent space. By confronting them one gets a sense of what it means for a silhouettes to be narrow. In fig.~\ref{fig:scatter} digit 1 has a narrower silhouette in train A, this reflects to harder to distinguish points in the representation in fig.~\ref{fig:trainA_scatter}.
+The plots of the form in fig.~\ref{fig:scatter} are used to visualize the latent space and how the data mapped onto it by the model. By confronting these two different kind of plots one gets a sense of what it means for a silhouette to be narrow. In fig.~\ref{fig:scatter} digit 1 has a narrower silhouette in training A, seen from the latent space point of view this reflects to harder to distinguish points in the representation in fig.~\ref{fig:trainA_scatter}, especially in the lower left quarter.
 
-The organization of the latent space is extremely sensitive to initial conditions of the training, producing significantly different representations from one training to another, with all the hyperparameters kept fixed. This is particularly clear by comparing figs.~\ref{fig:trainA_scatter} and \ref{fig:trainB_scatter}, where points are positioned is widely different ways. Surprisingly or not the corresponding silhouettes in figs.~\ref{fig:trainA_s} and \ref{fig:trainB_s} do not seem as different. This qualitative statement somewhat relies on the score $s_\textup{avg}$. This case is not an isolated exception as it might seem. The variability on the silhouettes seems to be less pronounced with respect to direct latent space plots. Nonetheless, there were cases with higher scores, up to $s_\textup{avg} = 0.60$ meaning quite a strong clustering in the latent space.
-
-\begin{figure}
-  \subfloat[][Train A: $s_\textup{avg} = 0.41\qquad\textup{Loss}_\textup{val} = 0.034$ \label{fig:trainA_s}
+Plots of these kinds were produced and studied side by side, repeating for the three different models considered. I also tried with different couples of digits. During this analysis, I used only the validation data in order to avoid the pitfall of making assertions on the model using the same data it was trained with.
+ This is what I have found:
+\begin{figure}[htb]
+  \subfloat[][Training A: $s_\textup{avg} = 0.41\qquad\textup{Loss}_\textup{val} = 0.034$ \label{fig:trainA_s}
 	]{
 	\resizebox{\linewidth}{!}{
   \includegraphics[width=.7\linewidth]{Denoising/s_score1-2_denoising5.png}
 	}}\\
-	\subfloat[][Train B: $s_\textup{avg} = 0.44\qquad\textup{Loss}_\textup{val} = 0.034$ \label{fig:trainB_s}
+	\subfloat[][Training B: $s_\textup{avg} = 0.44\qquad\textup{Loss}_\textup{val} = 0.034$ \label{fig:trainB_s}
 	]{
 	\resizebox{\linewidth}{!}{
   \includegraphics[width=.7\linewidth]{Denoising/s_score1-2_denoising7.png}
 	}}
-  \caption{Silhouette plots for two different trainings of the denoising autoencoder}
+  \caption{Silhouette plots for two different trainings of the denoising autoencoder, with all the hyperparameters kept fixed}
   \label{fig:s_score}
 \end{figure}
 
+\begin{itemize}
+\item The organization of the latent space is extremely sensitive to initial conditions of the training, producing significantly different representations from one training to another, with all the hyperparameters kept fixed. This is particularly evident by comparing figs.~\ref{fig:trainA_scatter} and \ref{fig:trainB_scatter}, where points are positioned in widely different ways.
 
-\begin{figure}
-  \subfloat[][Train A: $s_\textup{avg} = 0.41\qquad\textup{Loss}_\textup{val} = 0.034$ \label{fig:trainA_scatter}
+\item The corresponding silhouettes in figs.~\ref{fig:trainA_s} and \ref{fig:trainB_s} do not seem as different as the corresponding representations. This qualitative statement relies on the score $s_\textup{avg}$. This situation is not an isolated exception as one might expect. The variability on the silhouettes seems to be less pronounced with respect to the corresponding latent space plots. Nonetheless, there were cases with higher scores, up to $s_\textup{avg} = 0.60$ meaning quite a strong clustering in the latent space.
+
+\item For different couples of digits the results are analogous, a part from those hard to distiguish such as 4 and 9 or 1 and 7, where the denoising autoencoder fails to reconstruct the digits. In the cases were both the normal and denoising autoencoder manage to reconstruct the image there is no difference in the clustering that manifests over the variability to initial conditions.
+
+\item There are cases were the variability with respect to initial conditions manifests in a peculiar way. They show a clear-cut inbalance between the width of the two silhouettes, but it happens both ways as if the model could not find a trade off and resorts to clustering sharply only one digit at random.
+
+\item PCA produces a latent space where the clustering scores $s_\textup{avg} = 0.47$, a value within the variability observed in the autoencoders. This number refers to the couple of digits 1 and 2 and it only changes a little when considering other couples of digits.
+\end{itemize}
+
+  \begin{figure}[htb]
+  \subfloat[][Training A: $s_\textup{avg} = 0.41\qquad\textup{Loss}_\textup{val} = 0.034$ \label{fig:trainA_scatter}
 	]{
 	\resizebox{\linewidth}{!}{
   \includegraphics[width=.7\linewidth]{Denoising/scatter1-2_denoising5.png}
   }}\\[-2ex]
-	\subfloat[][Train B: $s_\textup{avg} = 0.44\qquad\textup{Loss}_\textup{val} = 0.034$ \label{fig:trainB_scatter}
+	\subfloat[][Training B: $s_\textup{avg} = 0.44\qquad\textup{Loss}_\textup{val} = 0.034$ \label{fig:trainB_scatter}
 	]{
 	\resizebox{\linewidth}{!}{
   \includegraphics[width=.7\linewidth]{Denoising/scatter1-2_denoising7.png}
 	}}
-  \caption{Validation data distribution in the latent space with coordinates $(z_1, z_2)$ for two different trainings of the denoising autoencoder (these trainings are the same of fig.~\ref{fig:s_score})}
+  \caption{Validation data distribution in the latent space with coordinates $(z_1, z_2)$ for two different trainings of the denoising autoencoder with all the hyperparameters kept fixed. These trainings correspond to the ones in fig.~\ref{fig:s_score}.}
   \label{fig:scatter}
 \end{figure}
 
-PCA produces a latent space where the clustering scores $s_\textup{avg} = 0.47$, a value within the variability observed in the autoencoders.
-
-This section uses only the validation data in order to avoid the pitfall of making assertions on the model using the same data it was trained with. The analysis presented here uses digits 1 and 2. For different couples of digits the results are analogous, a part from those hard to distiguish such as 4 and 9 or 1 and 7, where the denoising autoencoder fails to reconstruct the digits. In the cases were both the normal and denoising autoencoder manage to reconstruct the image there is no difference in the clustering that manifests over the variability to initial conditions.
 
 \section{Conclusions}
-The latent space representation shows some structure, but the variability observed with respect to initial conditions suggests that it is merely the autoencoder trying to find an efficient representation, there is no evidence of any sort of convergence to some preferred representation, even on the same model trained with the same hyperparameters. Therefore, the suggestion is that the encoding procedure tends to provide the latent space with a structure that has little to do with the expected data manifold. On the other hand we get the insight that there are many different representations, that there is no reason to believe equivalent. 
+The autoencoders considered can endow the latent space with some structur at least in the form of cluster. This points in the direction of the data manifold but the variability observed with respect to initial conditions suggests that it is merely the autoencoder trying to find an efficient representation. There is no evidence of any sort of convergence to some preferred representation, even on the same model trained with the same hyperparameters. Therefore, the insight is that this kind of encoding procedure tends to provide the latent space with a structure that has little to do with the expected data manifold. On the flip side, it is evident that there are many different representations and nothing hint to them being equivalent. 
 
-In build an efficient representation the activation function can be relevant, hard cut offs such as the one in ReLU can hinder the ability of the net in providing the latent space of this cluster structure. 
+As far as this analysis goes there is no manifest advantage in choosing a normal autoencoder or the denoising version. More surprisingly, their performance in the explored task shows no significant difference from the linear encoding given by PCA. Recall that the task at hand is providing the latent space of some cluster structure, not the ability Even if PCA's ability to reconstruct the correct image is significantly inferior to theirs. However, this is believed to be an accident of the particular setup choosen.
 
-As far as this analysis goes there is no manifest advantage in choosing a normal autoencoder or the denoising version. Surprisingly, their performance in the explored task brings no significant advantage from the linear encoding provided by PCA. Even if PCA's ability to reconstruct the correct image is significantly inferior to theirs. However, this is believed to be an accident of the particular setup choosen.
+In building an efficient representation the activation function can be relevant, hard cut offs such as the one in ReLU can hinder the ability of the net in providing the latent space of this cluster structure. 
+
 
 The last result is that the score $s_\textup{avg}$ doesn't seem to vary as strongly as the latent representation with respect to the initial conditions of the training.
 
