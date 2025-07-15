@@ -203,7 +203,7 @@ INFO: Elapsed epochs: {epoch}; Scale factor {self.scale_factor}
           the data linearly transformed to the principal components basis
         '''
         cov = torch.cov(self.data)
-        eigenval, eigenvec = torch.linalg.eigh(-cov) # -cov because it outputs sorted descending eigenval
+        eigenval, eigenvec = torch.linalg.eigh(-cov) # -cov because we need Descending eigenval
         eigenval = -eigenval
         pca_data = eigenvec@self.data
 
@@ -294,7 +294,7 @@ INFO: Elapsed epochs: {epoch}; Scale factor {self.scale_factor}
         - (float) mean error after adjustment
         '''
         # ---- a)
-        # (a,b refer to pseudo-code (Fig 2.2) in original paper)
+        # (a,b refer to pseudo-code (Fig 2.2) in original thesis from Gashler)
 
         self.scale_factor *= self.sigma
 
