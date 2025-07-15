@@ -13,12 +13,11 @@
 \graphicspath{{./Images/}}
 
 
-% TODO spelling check
 
 \begin{document}
 \title{\textbf{Investigation of latent space structure}}
 
-\abstract{ % TODO abstact dopo aver riletto Question
+\abstract{
 The data is often supposed to have a structure, namely the manifold hypothesis. This project tries to explore the possibility of part of this structure being encoded in the latent representation developed by different kinds of autoencoders.
 }
 
@@ -110,7 +109,7 @@ Unfortunately, this score must not be interpreted as some kind of invariant acro
 \section{Results}
 The silhouette plots in fig.~\ref{fig:s_score} are horizontal bar diagrams with the $s$ score for every data point ordered vertically from the highest. They are a graphical way to have an intuition of the cluster. If the silhouette, meaning the shaded region, is wide $s\approx1$ and those points are in the bulk of the cluster, while if it gets narrow $s\approx0$ and they are near the boundary. When it flips to the left it means that they are more easily identified as points belonging to the neighbor cluster.
 
-The plots of the form in fig.~\ref{fig:scatter} are used to visualise the latent space and how the data mapped onto it by the model. By confronting these two different kinds of plots, one gets a sense of what it means for a silhouette to be narrow. In fig.~\ref{fig:scatter} digit 1 has a narrower silhouette in training A, seen from the latent space point of view, this reflects to harder to distinguish points in the representation in fig.~\ref{fig:trainA_scatter}, especially in the lower left quarter.
+The plots of the form in fig.~\ref{fig:scatter} are used to visualise the latent space and how the data is mapped onto it by the model. By confronting these two different kinds of plots, one gets a sense of what it means for a silhouette to be narrow. In fig.~\ref{fig:scatter} digit 1 has a narrower silhouette in training A, seen from the latent space point of view, this reflects to harder to distinguish points in the representation in fig.~\ref{fig:trainA_scatter}, especially in the lower left quarter.
 
 Plots of these kinds were produced and studied side by side, repeating for the three different models considered. I also tried with different couples of digits. During this analysis, I used only the validation data in order to avoid the pitfall of making assertions on the model using the same data it was trained with.
  This is what I have found:
@@ -164,7 +163,7 @@ As far as this analysis goes, there is no manifest advantage in choosing a norma
 
 The silhouette score $s_\textup{avg}$ gives a practical graphical representation for studying clustering problems. Moreover, in the example studied, it may show a smaller variability than the underlying latent representation, since it doesn't seem to depend as strongly on the initial conditions of the training. This comment is merely qualitative, giving an account of what the repeated experiments seemed to suggest.
 
-It was found that hard cut-offs such as the one in ReLU can hinder the ability of the network to provide the latent space of the cluster structure considered, preventing the model building an efficient representation of the data. 
+It was found that hard cut-offs such as the one in ReLU can hinder the ability of the network to provide the latent space of the cluster structure considered, preventing the model from building an efficient representation of the data. 
 
 
 \section{Future developments}
